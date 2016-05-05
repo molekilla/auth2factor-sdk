@@ -10,7 +10,7 @@
 
     <title>auth2factor</title>
     <link rel="stylesheet" type="text/css" href="components/ng-prettyjson/dist/ng-prettyjson.min.css">
-    <link rel="stylesheet" type="text/css" href="components/ng-dialog/css/ngDialog.css" >
+    <link rel="stylesheet" type="text/css" href="components/ng-dialog/css/ngDialog.css">
     <link href="components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -31,6 +31,80 @@
                     <input type="text" class="form-control" ng-model="creds.apiKey" placeholder="Inserte la API Key">
                 </div>
             </div>
+        </div>
+        <hr>
+        <div class="row">
+            <h1>Delegar</h1>
+            <h5>Ruta: /users/authenticate</h5>
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                    <td>Contenido</td>
+                    <td>Ejemplo</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>
+                        <div class="form-group">
+                            <label>Correo</label>
+                            <input type="text" class="form-control" ng-model="delegateAuth.mail" placeholder="Inserte su direccion de correo">
+                        </div>
+                        <td><pre pretty-json="examples.delegate" />
+                        </td>
+                </tr>
+            </table>
+            <button ng-click="delegate();" class="btn btn-default">Ejecutar</button>
+            <button ng-click="authWithU2F();" class="btn btn-default">Autenticar U2F</button>
+
+            <hr>
+            <div>{{ authu2f.deviceStatus }}
+                <div>See <a href="https://developers.yubico.com/U2F/Libraries/Client_error_codes.html">for error codes</a>
+                </div>
+            </div>            
+            <div ng-switch="auth.resp.success">
+                <div ng-switch-when="false">
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span> {{auth.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-when="true">
+                    <div class="alert alert-success" role="alert">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                        <span class="sr-only">Éxito:</span> {{auth.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-default>
+                </div>
+            </div>
+
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                    <td>Contenido</td>
+                </tr>
+                <tr>
+                    <td>Solicitud URL</td>
+                    <td>
+                        <p><code>/users/delegate</code></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Código de Respuesta</td>
+                    <td>
+                        <p><code>{{auth.resp.status}}</code></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Headers</td>
+                    <td>
+                        <p>x-app-sign-request: <code>{{auth.appSignRequest}}</code></p>
+                        <p>x-u2f-sign-request: <code>{{auth.u2fSignRequest}}</code></p>
+                    </td>
+                </tr>
+            </table>
         </div>
         <hr>
         <div class="row">
@@ -253,8 +327,8 @@
 
             <hr>
             <div>{{ regu2f.deviceStatus }}
-            <div>See <a href="https://developers.yubico.com/U2F/Libraries/Client_error_codes.html">for error codes</a>
-            </div>
+                <div>See <a href="https://developers.yubico.com/U2F/Libraries/Client_error_codes.html">for error codes</a>
+                </div>
             </div>
             <div ng-switch="regu2f.resp.success">
                 <div ng-switch-when="false">
@@ -272,7 +346,7 @@
                 <div ng-switch-default>
                 </div>
             </div>
-            
+
             <table class="table table-bordered">
                 <tr class="active">
                     <td>Parámetro</td>
@@ -310,33 +384,8 @@
                     <td>
                         <p><code>201</code></p>
                     </td>
-                </tr>               
-            </table>            
-            <!--<div class="row">
-        <h1>Verificación de U2F</h1>
-        <h5>Ruta: /users/otc</h5>
-        <table class="table table-bordered">
-            <tr class="active">
-                <td>Parámetro</td>
-                <td>Contenido</td>
-                <td>Ejemplo</td>
-            </tr>
-            <tr>
-                <td>POST</td>
-                <td>
-                    <div class="form-group">
-                        <label>Header</label>
-                        <input type="text" class="form-control" ng-model="u2f.inputAPIKey">
-                    </div>                    
-                <td> {
-                    "code": "123456"
-                    }</td>
-            </tr>
-
-        </table>
-        <button ng-click="testU2F();" class="btn btn-default">Ejecutar</button>
-
-        <hr>-->
+                </tr>
+            </table>
             <br>
             <br>
             <br>
@@ -344,11 +393,9 @@
 
         <script src="u2f-api.js"></script>
         <script src="components/angular/angular.min.js"></script>
-        <script src="components/ng-dialog/js/ngDialog.min.js"></script>
         <script type="text/javascript" src="components/ng-prettyjson/dist/ng-prettyjson.min.js"></script>
         <script src="app/app.js"></script>
         <script src="app/common/U2FService.js"></script>
-        <script src="app/common/U2FModalCtrl.js"></script>
         <script src="app/common/FailUnlessResolvedWithin.js"></script>
         <script src="app/services/UserService.js"></script>
         <script src="app/services/SecurityKeyService.js"></script>

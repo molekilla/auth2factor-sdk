@@ -1,11 +1,55 @@
 IndexCtrl.$inject = ['$scope', '$http', 'SecurityKeyService',
-    'UserService', 'U2F', 'FailUnlessResolvedWithin', 'ngDialog'];
+    'UserService', 'U2F', 'FailUnlessResolvedWithin'];
 
 function IndexCtrl($scope, $http, SecurityKeyService,
-    UserService, U2F, FailUnlessResolvedWithin, ngDialog) {
+    UserService, U2F, FailUnlessResolvedWithin) {
 
     $scope.u2f = {
         inputAPIKey: ''
+    };
+
+    $scope.authWithU2F = function () {
+
+        var options = {
+            token: $scope.auth.appSignRequest,
+            host: $scope.creds.host
+        };
+
+        $scope.authu2f = {
+            deviceStatus: ''
+        };
+
+        var signReqs = JSON.parse($scope.auth.u2fSignRequest);
+        if (signReqs) {
+            $scope.authu2f.deviceStatus = 'Ingresa dispositivo...';
+            FailUnlessResolvedWithin(function (promise) {
+                U2F.sign(signReqs, function (data) {
+                    if (data.errorCode) {
+                        promise.reject(data);
+                    }
+
+                    promise.resolve(data);
+                });
+
+                return promise;
+            }, 40000)
+                .then(function (result) {
+
+                    $scope.authu2f.deviceStatus = '';
+                    UserService
+                        .u2fVerification(options, result)
+                        .then(function (response) {
+                            $scope.auth.resp.status = response.status;
+                            $scope.auth.resp.message = response.message;
+                            $scope.auth.resp.success = response.success.toString();
+                        });
+
+                }, function (error) {
+                    $scope.authu2f.deviceStatus = 'Error code ' + error.errorCode + '.';
+                    $scope.auth.resp.message = error.errorCode;
+                    $scope.auth.resp.success = false;
+                });
+        }
     };
 
 
@@ -69,6 +113,7 @@ function IndexCtrl($scope, $http, SecurityKeyService,
             "password": "password",
             "doRequestOtc": false
         },
+        delegate: { account: 'test@gmail.com' },
         otc: { "code": "123456" },
         requestChallenge: 'https://a2f-local/api/v2/security_keys/challenge/Y_XlWGqz1NhJYs_G7hj74sACqopOWPP1kW7C75KIB60?U2F_V2',
         register: { "clientData": "...long string...", "registrationData": "...long string..." }
@@ -106,6 +151,27 @@ function IndexCtrl($scope, $http, SecurityKeyService,
                 $scope.auth.resp.success = response.success.toString();
             });
     };
+
+    $scope.delegate = function () {
+
+        UserService.delegate({
+            email: $scope.delegateAuth.mail,
+            token: $scope.creds.apiKey,
+            host: $scope.creds.host
+        })
+            .then(function (response) {
+                $scope.auth.appSignRequest = response.headers['x-app-sign-request'];
+                $scope.auth.u2fSignRequest = response.headers['x-u2f-sign-request'];
+                $scope.auth.resp.status = response.status;
+                $scope.auth.resp.message = response.message;
+                $scope.auth.resp.success = response.success.toString();
+            }, function (response) {
+                $scope.auth.resp.status = response.status;
+                $scope.auth.resp.message = response.message;
+                $scope.auth.resp.success = response.success.toString();
+            });
+    };
+
 
     $scope.OTPVerification = {
         url: '/users/otc',
