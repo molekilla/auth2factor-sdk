@@ -126,7 +126,7 @@ module.exports = function (grunt) {
                 // the server port 
                 // can also be written as a function, e.g. 
                 // port: function() { return 8282; } 
-                port: 3000,
+                port: 3005,
 
 
                 // the host ip address 

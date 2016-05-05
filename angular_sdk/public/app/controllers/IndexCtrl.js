@@ -1,41 +1,77 @@
-IndexCtrl.$inject = ['$scope', '$http', 'UserService', 'U2F', 'FailUnlessResolvedWithin'];
+IndexCtrl.$inject = ['$scope', '$http', 'SecurityKeyService',
+    'UserService', 'U2F', 'FailUnlessResolvedWithin', 'ngDialog'];
 
-function IndexCtrl($scope, $http, UserService, U2F, FailUnlessResolvedWithin) {
+function IndexCtrl($scope, $http, SecurityKeyService,
+    UserService, U2F, FailUnlessResolvedWithin, ngDialog) {
 
     $scope.u2f = {
         inputAPIKey: ''
     };
-    
-    $scope.testU2F = function (req) {
-        req = req || $scope.u2f.inputAPIKey;
-        
-        FailUnlessResolvedWithin(function (promise) {
-            U2F.sign(req, function (data) {
-debugger
-                if (data.errorCode) {
-                    //dialog.close();
-                    promise.reject(data.errorCode);
+
+
+    $scope.registerU2F = function () {
+        $scope.regu2f = {
+            resp: {
+                status: "-",
+                message: "-",
+                success: "",
+            }
+        };
+
+        var options = {
+            token: $scope.creds.apiKey,
+            host: $scope.creds.host
+        };
+
+        $scope.regu2f.deviceStatus = '';
+        SecurityKeyService
+            .requestChallenge(options)
+            .then(function (response) {
+                if (response) {
+                    $scope.regu2f.deviceStatus = 'Ingresa dispositivo...';
+                    FailUnlessResolvedWithin(function (promise) {
+                        U2F.register([response], [], function (data) {
+                            if (data.errorCode) {
+                                promise.reject(data);
+                            }
+
+                            promise.resolve(data);
+                        });
+
+                        return promise;
+                    }, 40000)
+                        .then(function (result) {
+
+                            $scope.regu2f.deviceStatus = '';
+
+                            SecurityKeyService
+                                .register(options, result)
+                                .then(function (options) {
+                                    $scope.regu2f.deviceStatus = 'Dispositivo registrado';
+                                });
+
+                        }, function (error) {
+                            $scope.regu2f.deviceStatus = 'Error code ' + error.errorCode + '.';
+                        });
                 }
-
-                promise.resolve(data);
+            }, function (response) {
+                $scope.regu2f.resp.status = response.status;
+                $scope.regu2f.resp.message = response.message;
+                $scope.regu2f.resp.success = response.success.toString();
             });
-
-            return promise;
-        }, 40000).then(function (result) {
-
-            //dialog.close();
-            console.log(result);
-        });
     };
 
-    $scope.creds = $scope.creds || { host: 'https://domain/api/v2' };
+    $scope.creds = $scope.creds || { host: 'https://localhost/api/v2' };
 
     $scope.examples = {
         authenticate: {
             "email": "example@example.com",
             "password": "password",
             "doRequestOtc": false
-        }
+        },
+        otc: { "code": "123456" },
+        requestChallenge: 'https://a2f-local/api/v2/security_keys/challenge/Y_XlWGqz1NhJYs_G7hj74sACqopOWPP1kW7C75KIB60?U2F_V2',
+        register: { "clientData": "...long string...", "registrationData": "...long string..." }
     };
 
     $scope.auth = {

@@ -24,5 +24,8 @@
     ".jshintrc",
     "node_modules",
     "components"
-  ]
+  ],
+  "devDependencies": {
+    "ng-dialog": "^0.6.0"
+  }
 }

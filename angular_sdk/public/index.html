@@ -9,111 +9,310 @@
     <meta name="author" content="">
 
     <title>auth2factor</title>
-<link rel="stylesheet" type="text/css" href="components/ng-prettyjson/dist/ng-prettyjson.min.css">
-
+    <link rel="stylesheet" type="text/css" href="components/ng-prettyjson/dist/ng-prettyjson.min.css">
+    <link rel="stylesheet" type="text/css" href="components/ng-dialog/css/ngDialog.css" >
     <link href="components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body ng-controller="IndexCtrl">
-<div class="container">
-    <div class="row" style="padding-top: 50px;">
-        auth2factor
-        <h5><b>v2.0 SDK para Angular 1.5 /  SDK for Angular 1.5</b></h5>
-    </div>
-    <div class="row" style="padding-top: 30px;">
-        <div>
-            <div class="form-group">
-                <label for="url">URL</label>
-                <input type="text" class="form-control" ng-model="creds.host" placeholder="Inserte la URL" required>
-            </div>
-            <div class="form-group">
-                <label for="API Key">API Key</label>
-                <input type="text" class="form-control" ng-model="creds.apiKey" placeholder="Inserte la API Key">
+    <div class="container">
+        <div class="row" style="padding-top: 50px;">
+            auth2factor
+            <h5><b>v2.0 SDK para Angular 1.5 /  SDK for Angular 1.5</b></h5>
+        </div>
+        <div class="row" style="padding-top: 30px;">
+            <div>
+                <div class="form-group">
+                    <label for="url">URL</label>
+                    <input type="text" class="form-control" ng-model="creds.host" placeholder="Inserte la URL" required>
+                </div>
+                <div class="form-group">
+                    <label for="API Key">API Key</label>
+                    <input type="text" class="form-control" ng-model="creds.apiKey" placeholder="Inserte la API Key">
+                </div>
             </div>
         </div>
-    </div>    
-    <hr>
-    <div class="row">
-        <h1>Autenticar</h1>
-        <h5>Ruta: /users/authenticate</h5>
-        <table class="table table-bordered">
-            <tr class="active">
-                <td>Parámetro</td>
-                <td>Contenido</td>
-                <td>Ejemplo</td>
-            </tr>
-            <tr>
-                <td>POST</td>
-                <td>
-                    <div class="form-group">
-                        <label>Correo</label>
-                        <input type="text" class="form-control" ng-model="auth.mail" placeholder="Inserte su direccion de correo">
-                    </div>
-                    <div class="form-group">
-                        <label>Contraseña</label>
-                        <input type="password" class="form-control" ng-model="auth.password" placeholder="Inserte su contraseña">
-                    </div>
-                    <div class="form-group">
-                        <label>Enviar OTC?</label>
-                        <input type="text" class="form-control" 
-                        ng-model="auth.doRequestOTC">
-                    </div>                    
-                <td><pre pretty-json="examples.authenticate"  />
-</td>
-            </tr>
-        </table>
-        <button ng-click="authenticateUser();" class="btn btn-default">Ejecutar</button>
-
         <hr>
-        <div ng-switch="auth.resp.success">
-            <div ng-switch-when="false">
-                <div class="alert alert-danger" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Error:</span>
-                    {{auth.resp.message}}
-                </div>  
-            </div>
-            <div ng-switch-when="true">
-                <div class="alert alert-success" role="alert">
-                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                    <span class="sr-only">Éxito:</span>
-                    {{auth.resp.message}}
-                </div>  
-            </div>
-            <div ng-switch-default>  
-            </div>
-        </div>
-        
-        <table class="table table-bordered">
-            <tr class="active">
-                <td>Parámetro</td>
-                <td>Contenido</td>
-            </tr>
-            <tr>
-                <td>Solicitud URL</td>
-                <td>
-                    <p><code>{{auth.url}}</code></p>
-                </td>
-            </tr>
+        <div class="row">
+            <h1>Autenticar</h1>
+            <h5>Ruta: /users/authenticate</h5>
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                    <td>Contenido</td>
+                    <td>Ejemplo</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>
+                        <div class="form-group">
+                            <label>Correo</label>
+                            <input type="text" class="form-control" ng-model="auth.mail" placeholder="Inserte su direccion de correo">
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" class="form-control" ng-model="auth.password" placeholder="Inserte su contraseña">
+                        </div>
+                        <div class="form-group">
+                            <label>Enviar OTC?</label>
+                            <input type="text" class="form-control" ng-model="auth.doRequestOTC">
+                        </div>
+                        <td><pre pretty-json="examples.authenticate" />
+                        </td>
+                </tr>
+            </table>
+            <button ng-click="authenticateUser();" class="btn btn-default">Ejecutar</button>
 
-            <tr>
-                <td>Código de Respuesta</td>
-                <td>
-                    <p><code>{{auth.resp.status}}</code></p>
-                </td>
-            </tr>
+            <hr>
+            <div ng-switch="auth.resp.success">
+                <div ng-switch-when="false">
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span> {{auth.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-when="true">
+                    <div class="alert alert-success" role="alert">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                        <span class="sr-only">Éxito:</span> {{auth.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-default>
+                </div>
+            </div>
+
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                    <td>Contenido</td>
+                </tr>
+                <tr>
+                    <td>Solicitud URL</td>
+                    <td>
+                        <p><code>{{auth.url}}</code></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Código de Respuesta</td>
+                    <td>
+                        <p><code>{{auth.resp.status}}</code></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Headers</td>
+                    <td>
+                        <p>x-app-sign-request: <code>{{auth.appSignRequest}}</code></p>
+                        <p>x-u2f-sign-request: <code>{{auth.u2fSignRequest}}</code></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <hr>
+        <div class="row">
+            <h1>Verificación de OTC</h1>
+            <h5>Ruta: /users/otc</h5>
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                    <td>Contenido</td>
+                    <td>Ejemplo</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>
+                        <div class="form-group">
+                            <label>Código</label>
+                            <input type="text" class="form-control" ng-model="otc.code" placeholder="Inserte el codigo OTC">
+                        </div>
+                        <div class="form-group">
+                            <label>Header</label>
+                            <input type="text" class="form-control" ng-model="otc.inputAPIKey">
+                        </div>
+                        <td>
+                            <pre pretty-json="examples.otc" />
+                        </td>
+                </tr>
+
+            </table>
+            <button ng-click="verificationOTP();" class="btn btn-default">Ejecutar</button>
+
+            <hr>
+            <div ng-switch="OTPVerification.resp.success">
+                <div ng-switch-when="false">
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span> {{OTPVerification.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-when="true">
+                    <div class="alert alert-success" role="alert">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                        <span class="sr-only">Éxito:</span> {{OTPVerification.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-default>
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                    <td>Contenido</td>
+                </tr>
+                <tr>
+                    <td>Solicitud URL</td>
+                    <td>
+                        <p><code>{{OTPVerification.url}}</code></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Código de Respuesta</td>
+                    <td>
+                        <p><code>{{OTPVerification.resp.status}}</code></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <hr>
+        <div class="row">
+            <h1>Pedido de OTC</h1>
+            <h5>Ruta: /users/otc</h5>
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                </tr>
+            </table>
+            <button ng-click="requestOTC();" class="btn btn-default">Ejecutar</button>
+
+            <hr>
+            <div ng-switch="OTCrequest.resp.success">
+                <div ng-switch-when="false">
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span> {{OTCrequest.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-when="true">
+                    <div class="alert alert-success" role="alert">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                        <span class="sr-only">Éxito:</span> {{OTCrequest.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-default>
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                    <td>Contenido</td>
+                </tr>
+                <tr>
+                    <td>Solicitud URL</td>
+                    <td>
+                        <p><code>{{OTCrequest.url}}</code></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Código de Respuesta</td>
+                    <td>
+                        <p><code>{{OTCrequest.resp.status}}</code></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="row">
+            <h1>Registro U2F</h1>
+            <h5>Ruta: /security_keys/challenge y /security_keys</h5>
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                    <td>Contenido</td>
+                    <td>Ejemplo</td>
+                </tr>
+                <tr>
+                    <td>POST /security_keys/challenge</td>
+                    <td>
+                        <td>
+                        </td>
+                </tr>
+                <tr>
+                    <td>POST /security_keys</td>
+                    <td>
+                        <td><pre pretty-json="examples.register" />
+                        </td>
+                </tr>
+            </table>
+            <button ng-click="registerU2F();" class="btn btn-default">Ejecutar</button>
+
+            <hr>
+            <div>{{ regu2f.deviceStatus }}
+            <div>See <a href="https://developers.yubico.com/U2F/Libraries/Client_error_codes.html">for error codes</a>
+            </div>
+            </div>
+            <div ng-switch="regu2f.resp.success">
+                <div ng-switch-when="false">
+                    <div class="alert alert-danger" role="alert">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span> {{regu2f.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-when="true">
+                    <div class="alert alert-success" role="alert">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                        <span class="sr-only">Éxito:</span> {{regu2f.resp.message}}
+                    </div>
+                </div>
+                <div ng-switch-default>
+                </div>
+            </div>
             
-            <tr>
-                <td>Headers</td>
-                <td>
-                    <p>x-app-sign-request: <code>{{auth.appSignRequest}}</code></p>
-                    <p>x-u2f-sign-request: <code>{{auth.u2fSignRequest}}</code></p>
-                </td>
-            </tr>            
-        </table>
-    </div>
-    <hr>
-    <!--<div class="row">
+            <table class="table table-bordered">
+                <tr class="active">
+                    <td>Parámetro</td>
+                    <td>Contenido</td>
+                </tr>
+                <tr>
+                    <td>Solicitud URL</td>
+                    <td>
+                        <p><code>POST /security_keys/challenge?view=location</code></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Código de Respuesta</td>
+                    <td>
+                        <p><code>201</code></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Headers</td>
+                    <td>
+                        <p>Location: <code>{{ ::examples.requestChallenge }}</code></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Solicitud URL</td>
+                    <td>
+                        <p><code>POST /security_keys</code></p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Código de Respuesta</td>
+                    <td>
+                        <p><code>201</code></p>
+                    </td>
+                </tr>               
+            </table>            
+            <!--<div class="row">
         <h1>Verificación de U2F</h1>
         <h5>Ruta: /users/otc</h5>
         <table class="table table-bordered">
@@ -138,139 +337,22 @@
         <button ng-click="testU2F();" class="btn btn-default">Ejecutar</button>
 
         <hr>-->
-    <div class="row">
-        <h1>Verificación de OTC</h1>
-        <h5>Ruta: /users/otc</h5>
-        <table class="table table-bordered">
-            <tr class="active">
-                <td>Parámetro</td>
-                <td>Contenido</td>
-                <td>Ejemplo</td>
-            </tr>
-            <tr>
-                <td>POST</td>
-                <td>
-                    <div class="form-group">
-                        <label>Código</label>
-                        <input type="text" class="form-control" ng-model="otc.code" placeholder="Inserte el codigo OTC">
-                    </div>
-                    <div class="form-group">
-                        <label>Header</label>
-                        <input type="text" class="form-control" ng-model="otc.inputAPIKey">
-                    </div>                    
-                <td> {
-                    "code": "123456"
-                    }</td>
-            </tr>
-
-        </table>
-        <button ng-click="verificationOTP();" class="btn btn-default">Ejecutar</button>
-
-        <hr>
-        <div ng-switch="OTPVerification.resp.success">
-            <div ng-switch-when="false">
-                <div class="alert alert-danger" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Error:</span>
-                    {{OTPVerification.resp.message}}
-                </div>  
-            </div>
-            <div ng-switch-when="true">
-                <div class="alert alert-success" role="alert">
-                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                    <span class="sr-only">Éxito:</span>
-                    {{OTPVerification.resp.message}}
-                </div>  
-            </div>
-            <div ng-switch-default>  
-            </div>
+            <br>
+            <br>
+            <br>
         </div>
-        <table class="table table-bordered">
-            <tr class="active">
-                <td>Parámetro</td>
-                <td>Contenido</td>
-            </tr>
-            <tr>
-                <td>Solicitud URL</td>
-                <td>
-                    <p><code>{{OTPVerification.url}}</code></p>
-                </td>
-            </tr>
 
-            <tr>
-                <td>Código de Respuesta</td>
-                <td>
-                    <p><code>{{OTPVerification.resp.status}}</code></p>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <hr>
-    <div class="row">
-        <h1>Pedido de OTC</h1>
-        <h5>Ruta: /users/otc</h5>
-        <table class="table table-bordered">
-            <tr class="active">
-                <td>Parámetro</td>
-            </tr>
-            <tr>
-                <td>GET</td>
-            </tr>
-        </table>
-        <button ng-click="requestOTC();" class="btn btn-default">Ejecutar</button>
-
-        <hr>
-        <div ng-switch="OTCrequest.resp.success">
-        <div ng-switch-when="false">
-            <div class="alert alert-danger" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only">Error:</span>
-                {{OTCrequest.resp.message}}
-            </div>  
-        </div>
-        <div ng-switch-when="true">
-            <div class="alert alert-success" role="alert">
-                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                <span class="sr-only">Éxito:</span>
-                {{OTCrequest.resp.message}}
-            </div>  
-        </div>
-        <div ng-switch-default>  
-        </div>
-    </div>
-        <table class="table table-bordered">
-            <tr class="active">
-                <td>Parámetro</td>
-                <td>Contenido</td>
-            </tr>
-            <tr>
-                <td>Solicitud URL</td>
-                <td>
-                    <p><code>{{OTCrequest.url}}</code></p>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Código de Respuesta</td>
-                <td>
-                    <p><code>{{OTCrequest.resp.status}}</code></p>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <br>
-    <br>
-    <br>
-</div>
-
-<script src="u2f-api.js"></script>
-<script src="components/angular/angular.min.js"></script>
-<script type="text/javascript" src="components/ng-prettyjson/dist/ng-prettyjson.min.js"></script>
-<script src="app/app.js"></script>
-<script src="app/services/U2FService.js"></script>
-<script src="app/services/FailUnlessResolvedWithin.js"></script>
-<script src="app/services/UserService.js"></script>
-<script src="app/controllers/IndexCtrl.js"></script>
+        <script src="u2f-api.js"></script>
+        <script src="components/angular/angular.min.js"></script>
+        <script src="components/ng-dialog/js/ngDialog.min.js"></script>
+        <script type="text/javascript" src="components/ng-prettyjson/dist/ng-prettyjson.min.js"></script>
+        <script src="app/app.js"></script>
+        <script src="app/common/U2FService.js"></script>
+        <script src="app/common/U2FModalCtrl.js"></script>
+        <script src="app/common/FailUnlessResolvedWithin.js"></script>
+        <script src="app/services/UserService.js"></script>
+        <script src="app/services/SecurityKeyService.js"></script>
+        <script src="app/controllers/IndexCtrl.js"></script>
 </body>
 
 </html>
