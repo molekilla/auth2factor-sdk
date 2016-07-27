@@ -5,28 +5,56 @@ require 'vendor/autoload.php';
  * auth2factor
  */
 
+
+use \Firebase\JWT\JWT;
+
 class auth2factor {
+    private $host = "";
+    private $API_KEY = "";
+    private $API_SECRET = "";
+    
+    public function __construct($host) {
+        $this->host = $host;
+    }
 
     /**
      * Obtener el token_2fa del usuario
      * @return <string>
      */
-    public static function getToken(){
+    public function getToken(){
         return $_SESSION["user"]["token_2fa"];
     }
 
+    private function get_bearer_token($account) {
+        $hmac = $this->get_hmac($account);
+        return 'Bearer ' . $this->API_KEY . ':' . $hmac;
+    }
+
+    private function get_hmac($account) {
+        $key = $this->API_SECRET;
+        $payload = array(
+            "accountRequester" => $account,
+            "email" => $account,
+            "apiUniqueId" => $this->API_KEY,
+            "created" => date("DATE_W3C")
+        );
+
+        $jwt = JWT::encode($payload, $key);
+         
+        return $jwt;
+    }
 
     /**
      * Autenticacion de OTC
      * @return <bool>
      */
-    public static function validateOtc($code, $request_token) {
+    public function validate_otc($code, $request_token) {
 
         $data = array("code" => $code);
         $data_string = json_encode($data);
 
 
-        $API_HOST = "https://demo.auth2factor.com";
+        $API_HOST = $this->host;
         $ch = curl_init($API_HOST . "/api/v2/users/otc");
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_VERBOSE, 1);
@@ -69,13 +97,13 @@ class auth2factor {
      * Delega autenticacion
      * @return <string>
      */
-    public static function delegate($email){
-        $API_TOKEN = "...API TOKEN...";
+    public function delegate($email){
         $acct = $email;
+        $bearer = $this->get_bearer_token($acct);
         $data = array("account" => $acct);
         $data_string = json_encode($data);
 
-        $API_HOST = "https://demo.auth2factor.com";
+        $API_HOST = $this->host;
         $ch = curl_init($API_HOST . "/api/v2/users/delegate");
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_VERBOSE, 1);
@@ -86,7 +114,7 @@ class auth2factor {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
-            'Authorization: Bearer ' . $API_TOKEN,
+            'Authorization: ' . $bearer,
             'Content-Length: ' . strlen($data_string))
         );
         $output = curl_exec($ch);
@@ -117,7 +145,7 @@ class auth2factor {
         $data = array("email" => $u, "password" => $p);
         $data_string = json_encode($data);
 
-        $API_HOST = "https://demo.auth2factor.com";
+        $API_HOST = $this->host;
         $ch = curl_init($API_HOST . "/api/v2/users/authenticate");
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_VERBOSE, 1);
