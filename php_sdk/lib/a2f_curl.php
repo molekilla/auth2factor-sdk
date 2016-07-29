@@ -10,10 +10,12 @@ use \Firebase\JWT\JWT;
 
 class auth2factor {
     private $host = "";
-    private $API_KEY = "";
-    private $API_SECRET = "";
+    private $apiKey = "";
+    private $apiSecret = "";
     
-    public function __construct($host) {
+    public function __construct($host, $apiKey, $apiSecret) {
+        $this->apiKey = $apiKey;
+        $this->apiSecret = $apiSecret;
         $this->host = $host;
     }
 
@@ -27,15 +29,15 @@ class auth2factor {
 
     private function get_bearer_token($account) {
         $hmac = $this->get_hmac($account);
-        return 'Bearer ' . $this->API_KEY . ':' . $hmac;
+        return 'Bearer ' . $this-$apiKey . ':' . $hmac;
     }
 
     private function get_hmac($account) {
-        $key = $this->API_SECRET;
+        $key = $this-$apiSecret;
         $payload = array(
             "accountRequester" => $account,
             "email" => $account,
-            "apiUniqueId" => $this->API_KEY,
+            "apiUniqueId" => $this-$apiKey,
             "created" => date("DATE_W3C")
         );
 
@@ -86,8 +88,7 @@ class auth2factor {
         if ($auth_token == null) {
             return false;
         } else {
-            $_SESSION["user"]["token_2fa"] = $auth_token;
-            return true;
+            return $auth_token;
         }
 
         curl_close($ch);
