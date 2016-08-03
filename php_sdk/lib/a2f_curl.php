@@ -29,15 +29,15 @@ class auth2factor {
 
     private function get_bearer_token($account) {
         $hmac = $this->get_hmac($account);
-        return 'Bearer ' . $this-$apiKey . ':' . $hmac;
+        return 'Bearer ' . $this->apiKey . ':' . $hmac;
     }
 
     private function get_hmac($account) {
-        $key = $this-$apiSecret;
+        $key = $this->apiSecret;
         $payload = array(
             "accountRequester" => $account,
             "email" => $account,
-            "apiUniqueId" => $this-$apiKey,
+            "apiUniqueId" => $this->apiKey,
             "created" => date("DATE_W3C")
         );
 
@@ -45,7 +45,43 @@ class auth2factor {
          
         return $jwt;
     }
+    /**
+     * Requests an U2F challenge
+     * @return <string>
+     */
+    public function request_challenge($bearer_token) {
 
+
+        $API_HOST = $this->host;
+        $ch = curl_init($API_HOST . "/api/v2/security_keys/challenge");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_VERBOSE, 1);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $bearer_token,
+            'Content-Length: ' . strlen(""))
+        );
+        $output = curl_exec($ch);
+        $info = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        list($header, $body) = explode("\r\n\r\n", $output, 2);
+        $header=explode("\r\n", $header);
+        array_shift($header);    //get rid of "HTTP/1.1 200 OK"
+        $resp_headers=array();
+        foreach ($header as $k=>$v)
+        {
+            $v=explode(': ', $v, 2);
+            $resp_headers[$v[0]]=$v[1];
+        }
+        curl_close($ch);
+        
+        return $body;
+
+    }
     /**
      * Autenticacion de OTC
      * @return <bool>
