@@ -43,18 +43,21 @@ header("Content-type:application/json");
 
     // U2F enroll
     $challenge = $a2f_client->request_challenge($_GET['bearer_token']);
-    echo '<script src="u2f-api.js"></script>';
+    echo '<html><body><script src="u2f-api.js"></script>';
     
     echo "<script>" .
-    "var response = " . $challenge  . ";" .
-    "U2F.register([response], [], function (data) {" .
+    "var response = " . json_encode($challenge)  . ";" .
+    "u2f.register([response], [], function (data) {" .
     "if (data.errorCode) { console.log(data); return; }" .
-    "console.log(data);" .
-    "});</script>";
+    "console.log(data);console.log('Register key with POST /v2/security_keys')" .
+    "});" .
+    "console.log('Please enter key...');" .    
+    "</script></body></html>";
     return;
 } else if ($action == "register_key") {
     header("Content-type:application/json");
-    $ok = $a2f_client->register_key($_POST['bearer_token'], $_POST['client_data'], $_POST['registration_data']);
+    $ok = $a2f_client->register_key($_POST['bearer_token'], 
+    $_POST['client_data'], $_POST['registration_data']);
         echo json_encode(array("ok" => $ok));
     return;    
 }
