@@ -212,11 +212,12 @@ class auth2factor {
             $v=explode(': ', $v, 2);
             $resp_headers[$v[0]]=$v[1];
         }
-        $af_2fa_token = $resp_headers["x-app-sign-request"];
-        // Proceed to otc_validate
         curl_close($ch);
 
-        return $af_2fa_token;
+        return array(
+            "x-u2f-sign-request" => $resp_headers["x-u2f-sign-request"],
+            "x-app-sign-request" => $resp_headers["x-app-sign-request"]
+        );
     }
 
     /**

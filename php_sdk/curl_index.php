@@ -6,6 +6,7 @@ require_once('lib/a2f_curl.php');
 $action = $_REQUEST["sdk_call"];
 
 
+
 $a2f_client = new auth2factor($HOST, $API_KEY, $API_SECRET);	 
 
 if ($action == "delegate") {
@@ -27,10 +28,34 @@ header("Content-type:application/json");
     }
 
     // 2FA - 1st leg
-    $token = $a2f_client->delegate($u);
+    $requests = $a2f_client->delegate($u);
 
-    echo json_encode(array("token" => $token));
+    echo json_encode($requests);
     return;
+} else if ($action == "delegate_u2f") {
+    header("Content-type:text/html");
+
+    $u = $_POST["username"];
+
+    if ($u == NULL)  {
+    header('X-PHP-Response-Code: 400', true, 400);
+    echo json_encode(array("error" => "Missing username"));
+    return;
+    }
+
+    $requests = $a2f_client->delegate($u);
+    echo '<html><body><script src="u2f-api.js"></script>';
+    
+    echo "<script>" .
+    "var response = " . json_encode($requests["x-u2f-sign-request"])  . ";" .
+    "u2f.sign(response, function (data) {" .
+    "if (data.errorCode) { console.log(data); return; }" .
+    "console.log(data);console.log('Sign key with POST /v2/users/u2f')" .
+    "});" .
+    "console.log('Please enter key...');" .    
+    "</script></body></html>";
+    return;
+
 } else if ($action == "otc") {
 header("Content-type:application/json");
     
