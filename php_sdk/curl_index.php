@@ -35,7 +35,7 @@ header("Content-type:application/json");
 } else if ($action == "delegate_u2f") {
     header("Content-type:text/html");
 
-    $u = $_POST["username"];
+    $u = $_GET["username"];
 
     if ($u == NULL)  {
     header('X-PHP-Response-Code: 400', true, 400);
@@ -47,10 +47,14 @@ header("Content-type:application/json");
     echo '<html><body><script src="u2f-api.js"></script>';
     
     echo "<script>" .
-    "var response = " . json_encode($requests["x-u2f-sign-request"])  . ";" .
+    "var response = JSON.parse(" . json_encode($requests["x-u2f-sign-request"])  . ");" .
     "u2f.sign(response, function (data) {" .
     "if (data.errorCode) { console.log(data); return; }" .
-    "console.log(data);console.log('Sign key with POST /v2/users/u2f')" .
+    "console.log('clientData: ' + data.clientData);" .
+    "console.log('signatureData:' + data.signatureData);" .
+    "console.log('Sign key with POST /v2/users/u2f');" .
+    " console.log(' Use this temp request token');" .
+    " console.log('" . $requests["x-app-sign-request"] . "');" .
     "});" .
     "console.log('Please enter key...');" .    
     "</script></body></html>";
@@ -85,8 +89,13 @@ header("Content-type:application/json");
     $_POST['client_data'], $_POST['registration_data']);
         echo json_encode(array("ok" => $ok));
     return;    
-}
-     
+} else if ($action == "u2f") {
+    header("Content-type:application/json");
+    $sid = $a2f_client->validate_u2f($_POST['bearer_token'], 
+    $_POST['client_data'], $_POST['signature_data']);
+        echo json_encode(array("ok" => $sid));
+    return;    
+}     
 
 
 ?>
