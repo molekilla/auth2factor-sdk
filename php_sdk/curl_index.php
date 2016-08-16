@@ -6,6 +6,9 @@ require_once('lib/a2f_curl.php');
 $action = $_REQUEST["sdk_call"];
 
 
+$HOST = "";
+$API_KEY = "";
+$API_SECRET = "";
 
 $a2f_client = new auth2factor($HOST, $API_KEY, $API_SECRET);	 
 
