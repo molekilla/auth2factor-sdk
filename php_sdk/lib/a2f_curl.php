@@ -1,8 +1,7 @@
 <?php
-require 'vendor/autoload.php';
 
 /**
- * auth2factor
+ * auth2factor php 1.1.0
  */
 
 
@@ -19,13 +18,6 @@ class auth2factor {
         $this->host = $host;
     }
 
-    /**
-     * Obtener el token_2fa del usuario
-     * @return <string>
-     */
-    public function getToken(){
-        return $_SESSION["user"]["token_2fa"];
-    }
 
     private function get_bearer_token($account) {
         $hmac = $this->get_hmac($account);
@@ -47,7 +39,6 @@ class auth2factor {
     }
 
     public function register_key($bearer, $client_data, $registration_data){
-        $acct = $email;
 
         $data = array(
             "clientData" => $client_data,
@@ -57,31 +48,15 @@ class auth2factor {
 
         $API_HOST = $this->host;
         $ch = curl_init($API_HOST . "/api/v2/security_keys");
+        $this->default_req_headers($ch);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_VERBOSE, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_FAILONERROR, false);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
             'Authorization: Bearer ' . $bearer,
             'Content-Length: ' . strlen($data_string))
         );
-        $output = curl_exec($ch);
-        $info = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $err  = curl_error($ch);
-        list($header, $body) = explode("\r\n\r\n", $output, 2);
-        $header=explode("\r\n", $header);
-        array_shift($header);    //get rid of "HTTP/1.1 200 OK"
-        $resp_headers=array();
-        foreach ($header as $k=>$v)
-        {
-            $v=explode(': ', $v, 2);
-            $resp_headers[$v[0]]=$v[1];
-        }
-
+        $resp = $this->get_response($ch);
         curl_close($ch);
 
         return true;
@@ -96,35 +71,20 @@ class auth2factor {
 
         $API_HOST = $this->host;
         $ch = curl_init($API_HOST . "/api/v2/security_keys/challenge");
+        $this->default_req_headers($ch);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_VERBOSE, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_FAILONERROR, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
             'Authorization: Bearer ' . $bearer_token,
             'Content-Length: ' . strlen(""))
         );
-        $output = curl_exec($ch);
-        $info = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $err  = curl_error($ch);
-        list($header, $body) = explode("\r\n\r\n", $output, 2);
-        $header=explode("\r\n", $header);
-        array_shift($header);    //get rid of "HTTP/1.1 200 OK"
-        $resp_headers=array();
-        foreach ($header as $k=>$v)
-        {
-            $v=explode(': ', $v, 2);
-            $resp_headers[$v[0]]=$v[1];
-        }
+        $resp = $this->get_response($ch);
         curl_close($ch);
         
         return array(
-            "version" => $resp_headers["x-app-u2f-version"],
-            "appId" => $resp_headers["x-app-u2f-appid"],
-            "challenge" => $resp_headers["x-app-u2f-challenge"] 
+            "version" => $resp["headers"]["x-app-u2f-version"],
+            "appId" => $resp["headers"]["x-app-u2f-appid"],
+            "challenge" => $resp["headers"]["x-app-u2f-challenge"] 
         );
 
     }
@@ -141,40 +101,29 @@ class auth2factor {
 
         $API_HOST = $this->host;
         $ch = curl_init($API_HOST . "/api/v2/users/otc");
+        $this->default_req_headers($ch);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_VERBOSE, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_FAILONERROR, false);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
             'Authorization: Bearer ' . $request_token,
             'Content-Length: ' . strlen($data_string))
         );
-        $output = curl_exec($ch);
-        $info = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $err  = curl_error($ch);
-        list($header, $body) = explode("\r\n\r\n", $output, 2);
-        $header=explode("\r\n", $header);
-        array_shift($header);    //get rid of "HTTP/1.1 200 OK"
-        $resp_headers=array();
-        foreach ($header as $k=>$v)
-        {
-            $v=explode(': ', $v, 2);
-            $resp_headers[$v[0]]=$v[1];
-        }
+        $resp = $this->get_response($ch);
 
-        $auth_token = null;
-        if (isset($resp_headers["x-app-bearer"])) {
-            $auth_token = $resp_headers["x-app-bearer"];
-        }
+        if ($resp["status"] == 201) {
+            $auth_token = null;
+            if (isset($resp["headers"]["x-app-bearer"])) {
+                $auth_token = $resp["headers"]["x-app-bearer"];
+            }
 
-        if ($auth_token == null) {
-            return false;
+            if ($auth_token == null) {
+                return false;
+            } else {
+                return $auth_token;
+            }
         } else {
-            return $auth_token;
+            return $resp;
         }
 
         curl_close($ch);
@@ -196,13 +145,9 @@ class auth2factor {
 
         $API_HOST = $this->host;
         $ch = curl_init($API_HOST . "/api/v2/users/u2f");
+        $this->default_req_headers($ch);        
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_VERBOSE, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_FAILONERROR, false);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
             'Authorization: Bearer ' . $bearer,
@@ -211,15 +156,19 @@ class auth2factor {
         
         $resp = $this->get_response($ch);
         
-        $auth_token = null;
-        if (isset($resp["headers"]["x-app-bearer"])) {
-            $auth_token = $resp["headers"]["x-app-bearer"];
-        }
+        if ($resp["status"] == 201) {
+            $auth_token = null;
+            if (isset($resp["headers"]["x-app-bearer"])) {
+                $auth_token = $resp["headers"]["x-app-bearer"];
+            }
 
-        if ($auth_token == null) {
-            return false;
+            if ($auth_token == null) {
+                return false;
+            } else {
+                return $auth_token;
+            }
         } else {
-            return $auth_token;
+            return $resp;
         }
 
         curl_close($ch);
@@ -230,10 +179,18 @@ class auth2factor {
         $output = curl_exec($ch);
         $info = curl_getinfo($ch);
         $err  = curl_error($ch);
+        $resp_headers=array();
+
+        if ($err != false) {
+            return array(
+                "status" => $info["http_code"],
+                "headers" => $resp_headers,
+                "message" => $err
+            );            
+        }
         list($header, $body) = explode("\r\n\r\n", $output, 2);
         $header=explode("\r\n", $header);
         array_shift($header);    //get rid of "HTTP/1.1 200 OK"
-        $resp_headers=array();
         foreach ($header as $k=>$v)
         {
             $v=explode(': ', $v, 2);
@@ -245,6 +202,15 @@ class auth2factor {
             "headers" => $resp_headers,
         );
     }    
+
+    private function default_req_headers($ch) {
+        curl_setopt($ch, CURLOPT_VERBOSE, 1);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    }
+
     /**
      * Delega autenticacion
      * @return <string>
@@ -257,13 +223,9 @@ class auth2factor {
 
         $API_HOST = $this->host;
         $ch = curl_init($API_HOST . "/api/v2/users/delegate");
+        $this->default_req_headers($ch);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_VERBOSE, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_FAILONERROR, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);        
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
             'Authorization: ' . $bearer,
@@ -272,10 +234,14 @@ class auth2factor {
         $resp = $this->get_response($ch);
         curl_close($ch);
 
-        return array(
-            "x-u2f-sign-request" => $resp["headers"]["x-u2f-sign-request"],
-            "x-app-sign-request" => $resp["headers"]["x-app-sign-request"]
-        );
+        if ($resp["status"] == 201) {
+            return array(
+                "x-u2f-sign-request" => $resp["headers"]["x-u2f-sign-request"],
+                "x-app-sign-request" => $resp["headers"]["x-app-sign-request"]
+            );
+        } else {
+            return $resp;
+        }
     }
 
 
