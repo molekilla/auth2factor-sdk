@@ -1,7 +1,7 @@
 <?php
 
 /**
- * auth2factor php 1.1.0
+ * auth2factor PHP 1.1.1
  */
 
 
@@ -29,6 +29,19 @@ class auth2factor {
         $payload = array(
             "accountRequester" => $account,
             "email" => $account,
+            "apiUniqueId" => $this->apiKey,
+            "created" => date("DATE_W3C")
+        );
+
+        $jwt = JWT::encode($payload, $key);
+         
+        return $jwt;
+    }
+
+    private function get_profile_hmac($account) {
+        $key = $this->apiSecret;
+        $payload = array(
+            "account" => $account,
             "apiUniqueId" => $this->apiKey,
             "created" => date("DATE_W3C")
         );
@@ -212,6 +225,38 @@ class auth2factor {
     }
 
     /**
+     * has_active_user
+     * @return <bool>
+     */
+    public function has_active_user($user_email) {
+
+
+        $bearer = $this->get_bearer_token($user_email);
+        $API_HOST = $this->host;
+        $ch = curl_init($API_HOST . "/api/v1/profile/info");
+        $this->default_req_headers($ch);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Authorization: ' . $bearer,
+            'Content-Length: ' . strlen(""))
+        );
+        $resp = $this->get_response($ch);
+
+        if ($resp["status"] == 404) {
+            return false;
+        } else if ($resp["status"] == 200) {
+            return true;
+        } else {
+            return $resp;
+        }
+
+        curl_close($ch);
+
+    }
+
+
+    /**
      * Delega autenticacion
      * @return <string>
      */
@@ -235,10 +280,14 @@ class auth2factor {
         curl_close($ch);
 
         if ($resp["status"] == 201) {
-            return array(
-                "x-u2f-sign-request" => $resp["headers"]["x-u2f-sign-request"],
+            $requests = array(
                 "x-app-sign-request" => $resp["headers"]["x-app-sign-request"]
             );
+            if (isset($resp["headers"]["x-u2f-sign-request"])) {
+
+                $requests['x-u2f-sign-request'] = $resp["headers"]["x-u2f-sign-request"];
+            }
+            return $requests;
         } else {
             return $resp;
         }

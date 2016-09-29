@@ -68,7 +68,7 @@ Solicita un U2F challenge para iniciar el registro de una llave.
 Requests an U2F challenge to initiate key registration.
 
 ```php
-$challenge = $a2f_client->validate_otc("a valid bearer token"); 
+$challenge = $a2f_client->request_challenge("a valid bearer token"); 
 
 ```
 
