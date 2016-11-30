@@ -1,4 +1,5 @@
 # php_sdk
+## v1.2.0
 ## auth2factor PHP Integration SDK
 
 ### Requisitos
@@ -6,7 +7,7 @@
 * sudo apt-get install php5-curl
 * sudo apt-get install composer
 
-> Utiliza Firebase JWT para firmado HMAC
+> Utiliza Firebase JWT para firmado HMAC. Si no usas Composer, copiar las librerias de Firebase JWT a tu solución.
 
 ### API
 
@@ -20,11 +21,11 @@ $a2f_client = new auth2factor($HOST, $API_KEY, $API_SECRET);
 
 ``` 
 
-### Autenticacion
+### Autenticación
 
 #### delegate
 
-Retorna un token temporal. Utilizado para solicitar verificacion OTC/U2F.
+Retorna un token temporal. Utilizado para solicitar verificación OTC/U2F.
 
 Returns a temporary login token. Used to request an OTC/U2F verification.
 
@@ -42,7 +43,7 @@ Valida OTC. Retorna un bearer token, de otro modo false.
 Verifies OTC. Returns a bearer token, otherwise false.
 
 ```php
-$sid = $a2f_client->validate_otc("001122", "...temporary token");	 
+$sid = $a2f_client->validate_otc("...temporary token", "001122");	 
 
 ```
 
@@ -84,3 +85,49 @@ $registration_data = "AQAAADUw...";
 $a2f_client->register_key("a valid bearer token", $client_data, $registration_data);	 
 
 ```
+
+## Implementación U2F
+
+
+### FIDO U2F - Enrolamiento
+
+Una vez autenticado, el usuario ingresa a Configuración de Cuenta de la solución y le ofrece al usuario
+enrolar llave.
+
+#### [cookbook/register.php](cookbook/register.php)
+
+* Obtiene un U2F **challenge**: API request_challenge
+* Llama a libreria cliente `u2f.register` con el challenge y solicita firmar
+* Se procede a ingresar la llave
+* Se almacena la confirmación exitosa en `register_key.php`: API register_key
+
+
+### FIDO U2F - Autenticación
+
+Si el usuario tiene llaves registradas en el dominio donde se autentico en el 1er paso.
+
+#### [cookbook/sign.php](cookbook/sign.php)
+
+* Obtiene un conjunto de **sign requests** 
+* Llama a libreria cliente `u2f.sign` con los sign requests y solicita firmar
+* Se procede a ingresar la llave
+* Se valida en `sign_key.php` y obtiene un bearer token: API validate_u2f
+
+
+
+## Libreria Javascript para U2F
+
+Incluir libreria minificada
+
+```html
+<head>
+<script src="js/a2f.js"></script>
+</head>
+```
+
+Contiene
+
+* Axios para AJAX / REST `axios.min.js`
+* Axios config `axios-config.js`
+* U2F `u2f-api.js`
+* U2F utils `u2f-utils.js`

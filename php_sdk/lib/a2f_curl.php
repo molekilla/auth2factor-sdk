@@ -1,7 +1,7 @@
 <?php
 
 /**
- * auth2factor PHP 1.1.1
+ * auth2factor PHP 1.2.0
  */
 
 
@@ -51,6 +51,10 @@ class auth2factor {
         return $jwt;
     }
 
+    /**
+    * Register an U2F key
+    * @return <bool>
+    */
     public function register_key($bearer, $client_data, $registration_data){
 
         $data = array(
@@ -77,7 +81,7 @@ class auth2factor {
 
     /**
      * Requests an U2F challenge
-     * @return <string>
+     * @return <array>
      */
     public function request_challenge($bearer_token) {
 
@@ -103,10 +107,10 @@ class auth2factor {
     }
 
     /**
-     * Autenticacion de OTC
-     * @return <bool>
+     * Validates an OTC
+     * @return <string | array | bool>
      */
-    public function validate_otc($code, $request_token) {
+    public function validate_otc($request_token, $code) {
 
         $data = array("code" => $code);
         $data_string = json_encode($data);
@@ -144,8 +148,8 @@ class auth2factor {
     }
 
     /**
-     * Autenticacion de U2F
-     * @return <bool>
+     * Validates an U2F user signing
+     * @return <array>
      */
     public function validate_u2f($bearer, $client_data, $signature_data) {
 
@@ -257,8 +261,9 @@ class auth2factor {
 
 
     /**
-     * Delega autenticacion
-     * @return <string>
+     * Delegate or authenticate on behalf
+     * Returns a temporary request token and a set of U2F challenges if any
+     * @return <array>
      */
     public function delegate($email){
         $acct = $email;
@@ -284,7 +289,6 @@ class auth2factor {
                 "x-app-sign-request" => $resp["headers"]["x-app-sign-request"]
             );
             if (isset($resp["headers"]["x-u2f-sign-request"])) {
-
                 $requests['x-u2f-sign-request'] = $resp["headers"]["x-u2f-sign-request"];
             }
             return $requests;

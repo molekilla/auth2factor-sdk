@@ -67,7 +67,7 @@ header("Content-type:application/json");
 header("Content-type:application/json");
     
     // 2FA - OTC
-    $sid = $a2f_client->validate_otc($_POST['otc'], $_POST['bearer_token']);
+    $sid = $a2f_client->validate_otc($_POST['bearer_token'], $_POST['otc']);
     echo json_encode(array("sid" => $sid));
     return;    
 } else if ($action == "request_key_challenge") {

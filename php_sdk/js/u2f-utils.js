@@ -13,7 +13,7 @@ var u2fUtils = (function () {
     utils.errorMap = u2fErrorMap;
     utils.getErrorDescription = function(idx) {
         return u2fErrorMap[idx];
-    }
+    };
 
     return utils;
 } ());

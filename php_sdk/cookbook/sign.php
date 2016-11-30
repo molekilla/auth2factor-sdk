@@ -3,10 +3,7 @@ require_once('auth2factor/a2f_client.php');
 ?>
 <html>
 <head>
-<script src="js/u2f-api.js"></script>
-<script src="js/axios.min.js"></script>
-<script src="js/axios-config.js"></script>
-<script src="js/u2f-utils.js"></script>
+<script src="js/a2f.js"></script>
 </head>
 <?php
   if (isset($_GET['verify_key'])) {
@@ -35,7 +32,6 @@ require_once('auth2factor/a2f_client.php');
     <?php
     // U2F sign
     echo "var response = JSON.parse(" . json_encode($_SESSION['A2F_req_tokens']['x-u2f-sign-request']) . ");";
-    echo "var tempToken = '" . $_SESSION['A2F_req_tokens']['x-app-sign-request'] . "';";
     ?>    
 
     u2f.sign(response, function (data) {
@@ -47,8 +43,7 @@ require_once('auth2factor/a2f_client.php');
       console.log(data);
       axios.post('/auth2factor/sign_key.php',  
           'client_data=' + data.clientData + '&' +
-          'signature_data=' + data.signatureData + '&' +
-          'temp_token=' + tempToken
+          'signature_data=' + data.signatureData
      )
         .then(function (response) {
           console.log(response);

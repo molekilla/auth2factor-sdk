@@ -7,11 +7,8 @@ $a2f_client = new auth2factor($API_HOST, $API_KEY, $API_SECRET);
 
 header("Content-type:application/json");
 
-if (!isset($_SESSION)) {
-  session_start();
-}
+$req_token = $_SESSION['A2F_req_tokens']['x-app-sign-request'];
 
-$req_token = $_POST['temp_token'];
 $ok = false;
 if (isset($req_token) && isset($_POST['client_data']) && isset($_POST['signature_data'])) { 
   
@@ -19,7 +16,6 @@ if (isset($req_token) && isset($_POST['client_data']) && isset($_POST['signature
 
     if (isset($resp["status"])) {
       echo json_encode($resp);
-      // http_response_code($resp["status"]);
       return;      
     } else {
       $_SESSION['2FA_SessionId'] = $resp;

@@ -3,10 +3,7 @@ require_once('auth2factor/a2f_client.php');
 ?>
 <html>
 <head>
-<script src="js/u2f-api.js"></script>
-<script src="js/axios.min.js"></script>
-<script src="js/axios-config.js"></script>
-<script src="js/u2f-utils.js"></script>
+<script src="js/a2f.js"></script>
 </head>
 
 
