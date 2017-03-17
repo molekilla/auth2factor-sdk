@@ -30,6 +30,8 @@ class auth2factor {
             "accountRequester" => $account,
             "email" => $account,
             "apiUniqueId" => $this->apiKey,
+            "iat" => time(),
+            "exp" => time() + 60*5,
             "created" => date("DATE_W3C")
         );
 
@@ -43,6 +45,8 @@ class auth2factor {
         $payload = array(
             "account" => $account,
             "apiUniqueId" => $this->apiKey,
+            "iat" => time(),
+            "exp" => time() + 60*5,            
             "created" => date("DATE_W3C")
         );
 
