@@ -1,7 +1,7 @@
 <?php
 
 /**
- * auth2factor PHP 1.2.0
+ * auth2factor PHP 1.3.0
  */
 
 
